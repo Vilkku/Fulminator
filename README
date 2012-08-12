@@ -1,0 +1,16 @@
+Fulminator is an addon for Elemental Shamans that provides spell overlay effects for Fulmination and Lava Surge by using the Blizzard spell overlays added in 4.0.1. Overlays can be enabled and disables separately.
+
+For Lava Burst, it shows the overlay whenever the Lava Burst cooldown is reset due to Lava Surge (not if the cooldown simply ends normally). Overlay disappears after a short while or when you start casting Lava Burst.
+
+For Fulmination, it shows the overlay when Lightning Shield has reached a certain amount of stacks (customizable, default 9). Overlay appears after a short while or when you cast Earth Shock.
+
+All settings can be found in the AddOn options panel.
+
+Please post any bugs, issues or suggestions in the comments, and thank you for using Fulminator!
+
+Release versions of Fulminator can be found on WoWInterface and Curse:
+http://www.wowinterface.com/downloads/info18367-Fulminator.html
+http://www.curse.com/addons/wow/fulminator
+
+Development versions of Fulminator can be found on github:
+https://github.com/Vilkku/Fulminator
