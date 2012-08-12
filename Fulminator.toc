@@ -1,0 +1,7 @@
+## Interface: 40300
+## Title: Fulminator
+## Notes: Displays an aura when you reach high amounts of Lightning Shield stacks
+## Author: Vilkku
+## SavedVariables: Fulminator_Fulminate, Fulminator_LavaSurge, Fulminator_StackCount
+
+Fulminator.lua
