@@ -1,8 +1,8 @@
 Fulminator = CreateFrame("frame")
 Fulminator:SetScript("OnEvent", function(self, event, ...) if self[event] then return self[event](self, event, ...) end end)
 
-local UpdateSeconds, DelayTime, VisibleTime, FulminationTime, LavaSurgeTime, FulminationOverlayShowing, LavaSurgeOverlayShowing, HasFulminate, HasLavaSurge = 1, 0, 3, 10, 10, false, false, false, false;
-Fulminator_Fulminate, Fulminator_LavaSurge, Fulminator_StackCount = true, true, 9;
+local UpdateSeconds, DelayTime, VisibleTime, FulminationTime, FulminationOverlayShowing, HasFulminate = 1, 0, 3, 10, false, false;
+Fulminator_Fulminate, Fulminator_StackCount = true, 7;
 
 Fulminator:RegisterEvent("PLAYER_REGEN_DISABLED")
 
@@ -12,24 +12,13 @@ end
 
 function Fulminator:HasTalent()
 	local _,_,_,_, FulminateRank = GetTalentInfo(1, 13);
-	local _,_,_,_, LavaSurgeRank = GetTalentInfo(1, 18);
-	if ((FulminateRank ~= 0) or (LavaSurgeRank ~=0)) then
 		if (FulmianteRank ~= 0) then
 			HasFulminate = true;
+            return true;
 		else
 			HasFulminate = false;
+            return false;
 		end
-		if (LavaSurgeRank ~= 0) then
-			HasLavaSurge = true;
-		else
-			HasLavaSurge = false;
-		end
-		return true;
-	else
-		HasLavaSurge = false;
-		HasFulminate = false;
-		return false;
-	end
 end
 
 function Fulminator:CheckSpec()
@@ -70,15 +59,6 @@ local Fulmination = {
 	r = 197, g = 226, b = 246,
 }
 
-local LavaSurge = { 
-	id = 77762,
-	texture = "TEXTURES\\SPELLACTIVATIONOVERLAYS\\BLOOD_SURGE.BLP",
-	positions = "LEFT + RIGHT (FLIPPED)",
-	scale = 1,
-	r = 225, g = 120, b = 0,
-}
-
-
 function Fulminator:ON_UPDATE()
 	local CurrentTime = GetTime();
 	if (CurrentTime >= DelayTime) then
@@ -86,25 +66,12 @@ function Fulminator:ON_UPDATE()
 		if (FulminationTime ~= 10) then
 			FulminationTime = (FulminationTime + UpdateSeconds);
 		end
-		if (LavaSurgeTime ~= 10) then
-			LavaSurgeTime = (LavaSurgeTime + UpdateSeconds);
-		end
  	  	if (FulminationTime >= VisibleTime) then
-			if (not LavaSurgeOverlayShowing) then
-				Fulminator:SetScript("OnUpdate", nil);
-			end
+			Fulminator:SetScript("OnUpdate", nil);
 			FulminationOverlayShowing = false;
 			FulminationTime = 10;
 			Fulminator:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED");
 			SpellActivationOverlay_HideOverlays(SpellActivationOverlayFrame, Fulmination.id);
-		end
- 	  	if (LavaSurgeTime >= VisibleTime) then
-			if (not FulminationOverlayShowing) then
-				Fulminator:SetScript("OnUpdate", nil);
-			end
-			LavaSurgeOverlayShowing = false;
-			LavaSurgeTime = 10;
-			SpellActivationOverlay_HideOverlays(SpellActivationOverlayFrame, LavaSurge.id);
 		end
  	end
 end
@@ -125,24 +92,6 @@ function Fulminator:COMBAT_LOG_EVENT_UNFILTERED(e, timestamp, event, hideCaster,
 			end
 		end
 	end
-	if (destName == nil) then
-		if (event == "SPELL_CAST_SUCCESS") and (sourceName == UnitName("player") and (Fulminator_LavaSurge) and (HasLavaSurge)) then
-			local spellId, spellName, spellSchool = ...;
-			if (spellId == 77762) then
-				if LavaSurgeOverlayShowing == false then LavaSurgeOverlayShowing = true; end
-				DelayTime, LavaSurgeTime = 0, -1;
-				Fulminator:SetScript("OnUpdate", function() Fulminator:ON_UPDATE(); end);
-				SpellActivationOverlay_ShowAllOverlays(SpellActivationOverlayFrame, LavaSurge.id, LavaSurge.texture, LavaSurge.positions, LavaSurge.scale, LavaSurge.r, LavaSurge.g, LavaSurge.b);
-			end
-		end
-		if (event == "SPELL_CAST_START") and (sourceName == UnitName("player") and (LavaSurgeOverlayShowing)) then
-			local spellId, spellName, spellSchool = ...;
-			if (spellId == 51505) then 
-				LavaSurgeOverlayShowing = false;
-				SpellActivationOverlay_HideOverlays(SpellActivationOverlayFrame, LavaSurge.id);
-			end
-		end
-	end	
 end
 
 function Fulminator:UNIT_SPELLCAST_SUCCEEDED(e, unitID, spell, rank, lineID, spellId)
@@ -163,7 +112,6 @@ InterfaceOptions_AddCategory(FulminatorPanel);
 
 FulminatorPanel:SetScript("OnShow", function()
 	FulminatorFulminateButton:SetChecked(Fulminator_Fulminate)
-	FulminatorLavaSurgeButton:SetChecked(Fulminator_LavaSurge)
 	FulminatorStackSlider:SetValue(Fulminator_StackCount)
 end)
 
@@ -195,37 +143,13 @@ local FulminateEnableText = FulminateEnable:CreateFontString("FulminatorFulminat
 FulminateEnableText:SetPoint("LEFT", FulminateEnable, "RIGHT", 0, 1)
 FulminateEnableText:SetText("Enable Fulminate overlay")
 
-local LavaSurgeEnable = CreateFrame("CheckButton", "FulminatorLavaSurgeButton", FulminatorPanel)
-LavaSurgeEnable:SetWidth(26)
-LavaSurgeEnable:SetHeight(26)
-LavaSurgeEnable:SetPoint("TOPLEFT", 16, -57)
-LavaSurgeEnable:SetScript("OnClick", function(frame)
-	local tick = frame:GetChecked()
-	if tick then
-		PlaySound("igMainMenuOptionCheckBoxOn")
-		Fulminator_LavaSurge = true
-	else
-		PlaySound("igMainMenuOptionCheckBoxOff")
-		Fulminator_LavaSurge = false
-	end
-end)
-LavaSurgeEnable:SetHitRectInsets(0, -200, 0, 0)
-LavaSurgeEnable:SetNormalTexture("Interface\\Buttons\\UI-CheckBox-Up")
-LavaSurgeEnable:SetPushedTexture("Interface\\Buttons\\UI-CheckBox-Down")
-LavaSurgeEnable:SetHighlightTexture("Interface\\Buttons\\UI-CheckBox-Highlight")
-LavaSurgeEnable:SetCheckedTexture("Interface\\Buttons\\UI-CheckBox-Check")
-
-local LavaSurgeEnableText = LavaSurgeEnable:CreateFontString("FulminatorLavaSurgeButtonTitle", "ARTWORK", "GameFontHighlight")
-LavaSurgeEnableText:SetPoint("LEFT", LavaSurgeEnable, "RIGHT", 0, 1)
-LavaSurgeEnableText:SetText("Enable Lava Surge overlay")
-
 CreateFrame("Slider", "FulminatorStackSlider", FulminatorPanel, "OptionsSliderTemplate")
 FulminatorStackSlider:SetWidth(335)
 FulminatorStackSlider:SetHeight(16)
 FulminatorStackSlider:SetPoint("TOPLEFT", 16, -100)
-FulminatorStackSliderLow:SetText("4")
-FulminatorStackSliderHigh:SetText("9")
-FulminatorStackSlider:SetMinMaxValues(4,9)
+FulminatorStackSliderLow:SetText("2")
+FulminatorStackSliderHigh:SetText("7")
+FulminatorStackSlider:SetMinMaxValues(2,7)
 FulminatorStackSlider:SetValueStep(1)
 FulminatorStackSlider:SetScript("OnValueChanged", function(self, value)
 	FulminatorStackSliderText:SetFormattedText("Show overlay at %d stacks", value)

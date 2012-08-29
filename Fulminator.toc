@@ -1,4 +1,4 @@
-## Interface: 40300
+## Interface: 50001
 ## Title: Fulminator
 ## Notes: Displays an aura when you reach high amounts of Lightning Shield stacks
 ## Author: Vilkku
